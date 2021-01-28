@@ -16,24 +16,26 @@ namespace DevIO.App.Controllers
     public class ProdutosController : BaseController
     {
         private readonly IProdutoRepository _produtoRepository;
+        private readonly IFornecedorRepository _fornecedorRepository;
         private readonly IMapper _mapper;
 
-        public ProdutosController(IProdutoRepository produtoRepository, IMapper mapper)
+        public ProdutosController(IProdutoRepository produtoRepository, IMapper mapper, IFornecedorRepository fornecedorRepository)
         {
             _produtoRepository = produtoRepository;
             _mapper = mapper;
+            _fornecedorRepository = fornecedorRepository;
         }
 
         // GET: Produtos
         public async Task<IActionResult> Index()
         {
-            return View( _mapper.Map<IEnumerable<ProdutoViewModel>>(await _produtoRepository.ObterTodos()));
+            return View( _mapper.Map<IEnumerable<ProdutoViewModel>>(await _produtoRepository.ObterProdutosFornecedores()));
         }
 
         // GET: Produtos/Details/5
         public async Task<IActionResult> Details(Guid id)
         {
-            var produtoViewModel = await ObterPorId(id);
+            var produtoViewModel = await ObterProduto(id);
 
             if (produtoViewModel == null)
             {
@@ -44,9 +46,10 @@ namespace DevIO.App.Controllers
         }
 
         // GET: Produtos/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            var produtoViewModel = await PopularFornecedores(new ProdutoViewModel());
+            return View(produtoViewModel);
         }
 
         // POST: Produtos/Create
@@ -56,19 +59,21 @@ namespace DevIO.App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProdutoViewModel produtoViewModel)
         {
+            produtoViewModel = await PopularFornecedores(produtoViewModel);
+
             if (!ModelState.IsValid)
             {
                 return View(produtoViewModel);
             }
 
             await _produtoRepository.Adicionar(_mapper.Map<Produto>(produtoViewModel));
-            return RedirectToAction("Index");
+            return View(produtoViewModel);
         }
 
         // GET: Produtos/Edit/5
         public async Task<IActionResult> Edit(Guid id)
         {
-            var produtoViewModel = await ObterPorId(id);
+            var produtoViewModel = await ObterProduto(id);
 
             if (produtoViewModel == null)
             {
@@ -102,7 +107,7 @@ namespace DevIO.App.Controllers
         // GET: Produtos/Delete/5
         public async Task<IActionResult> Delete(Guid id)
         {
-            var produtoViewModel = await ObterPorId(id);
+            var produtoViewModel = await ObterProduto(id);
 
             if (produtoViewModel == null)
             {
@@ -117,7 +122,7 @@ namespace DevIO.App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var produtoViewModel = await ObterPorId(id);
+            var produtoViewModel = await ObterProduto(id);
 
             if (produtoViewModel == null)
             {
@@ -128,9 +133,17 @@ namespace DevIO.App.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task<ProdutoViewModel> ObterPorId(Guid id)
+        private async Task<ProdutoViewModel> ObterProduto(Guid id)
         {
-            return _mapper.Map<ProdutoViewModel>(await _produtoRepository.ObterPorId(id));
+            var produto = _mapper.Map<ProdutoViewModel>(await _produtoRepository.ObterPorId(id));
+            produto.Fornecedores = _mapper.Map<IEnumerable<FornecedorViewModel>>(await _fornecedorRepository.ObterTodos());
+            return produto;
+        }
+
+        private async Task<ProdutoViewModel> PopularFornecedores(ProdutoViewModel produto)
+        {
+            produto.Fornecedores = _mapper.Map<IEnumerable<FornecedorViewModel>>(await _fornecedorRepository.ObterTodos());
+            return produto;
         }
     }
 }
