@@ -45,6 +45,6 @@ namespace DevIO.App.ViewModels
 
         [HiddenInput]
         /* EF Relational */
-        public Guid Fornecedor { get; set; }
+        public Guid FornecedorId { get; set; }
     }
 }

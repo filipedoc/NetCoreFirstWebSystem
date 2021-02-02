@@ -1,4 +1,5 @@
 using AutoMapper;
+using DevIO.App.AutoMapper;
 using DevIO.App.Data;
 using DevIO.Business.Interfaces;
 using DevIO.Data.Context;

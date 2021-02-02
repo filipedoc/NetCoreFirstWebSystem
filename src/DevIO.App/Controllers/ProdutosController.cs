@@ -63,7 +63,7 @@ namespace DevIO.App.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(produtoViewModel);
+                return View(produtoViewModel); 
             }
 
             await _produtoRepository.Adicionar(_mapper.Map<Produto>(produtoViewModel));
@@ -135,7 +135,7 @@ namespace DevIO.App.Controllers
 
         private async Task<ProdutoViewModel> ObterProduto(Guid id)
         {
-            var produto = _mapper.Map<ProdutoViewModel>(await _produtoRepository.ObterPorId(id));
+            var produto = _mapper.Map<ProdutoViewModel>(await _produtoRepository.ObterProdutoFornecedor(id));
             produto.Fornecedores = _mapper.Map<IEnumerable<FornecedorViewModel>>(await _fornecedorRepository.ObterTodos());
             return produto;
         }

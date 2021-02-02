@@ -57,7 +57,7 @@ namespace DevIO.App.Controllers
                 return View(fornecedorViewModel);
             }
 
-            var fornecedor = _mapper.Map<Fornecedor>(fornecedorViewModel);
+            Fornecedor fornecedor = _mapper.Map<Fornecedor>(fornecedorViewModel);
             await _fornecedorRepository.Adicionar(fornecedor);
 
             return RedirectToAction("Index");
