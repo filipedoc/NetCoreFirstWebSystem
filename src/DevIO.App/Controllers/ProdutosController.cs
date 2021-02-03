@@ -100,17 +100,31 @@ namespace DevIO.App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, ProdutoViewModel produtoViewModel)
         {
-            if (id != produtoViewModel.Id)
+            if (id != produtoViewModel.Id) return NotFound();
+
+            var produtoAtualizacao = await ObterProduto(id);
+            produtoViewModel.Fornecedor = produtoAtualizacao.Fornecedor;
+            produtoViewModel.Imagem = produtoAtualizacao.Imagem;
+            if (!ModelState.IsValid) return View(produtoViewModel);
+
+            //Caso tenho sido cadastrada uma nova imagem
+            if (produtoViewModel.ImagemUpload != null)
             {
-                return NotFound();
+                var imgPrefix = Guid.NewGuid() + "_";
+                if (!await uploadArquivo(produtoViewModel.ImagemUpload, imgPrefix))
+                {
+                    return View(produtoViewModel);
+                }
+
+                produtoAtualizacao.Imagem = imgPrefix + produtoViewModel.ImagemUpload.FileName;
             }
 
-            if (!ModelState.IsValid)
-            {
-                return View(produtoViewModel);      
-            }
-            
-            await _produtoRepository.Atualizar(_mapper.Map<Produto>(produtoViewModel));
+            produtoAtualizacao.Nome = produtoViewModel.Nome;
+            produtoAtualizacao.Descricao = produtoViewModel.Descricao;
+            produtoAtualizacao.Ativo = produtoViewModel.Ativo;
+            produtoAtualizacao.Valor = produtoViewModel.Valor;
+
+            await _produtoRepository.Atualizar(_mapper.Map<Produto>(produtoAtualizacao));
             return RedirectToAction("Index");
         }
 

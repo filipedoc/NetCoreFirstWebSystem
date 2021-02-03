@@ -26,7 +26,7 @@ namespace DevIO.App.ViewModels
         [StringLength(1000, ErrorMessage = "O campo {0} precisa ter {2} e {1} caracteres", MinimumLength = 2)]
         public string Descricao { get; set; }
 
-        [DisplayName("Imagem")]
+        [DisplayName("Imagem do Produto")]
         public IFormFile ImagemUpload { get; set; }
 
         public string Imagem { get; set; }
